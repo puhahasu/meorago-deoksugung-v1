@@ -15,7 +15,6 @@ function renderPlace(){
   const section=document.createElement('details');const title=document.createElement('summary');title.textContent=note.title;
   const body=document.createElement('p');body.textContent=note.body;section.append(title,body);notes.append(section);
  });
- document.getElementById('draftNotice').hidden=!p.draft;
 }
 renderPlace();
 
