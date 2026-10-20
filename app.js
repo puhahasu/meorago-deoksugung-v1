@@ -1,18 +1,23 @@
 const key = new URLSearchParams(location.search).get('place');
 let p = places.find(p=>p.key===key)||places[0];
 document.title='머라고';
-document.getElementById('sentence').textContent=p.summary;
-document.getElementById('detail').innerHTML=p.detail;
-document.querySelector(`[data-place="${p.key}"]`).setAttribute('aria-current','page');
-const src='assets/'+p.photo;
-const audience = new URLSearchParams(location.search).get('audience') === 'field' ? 'field' : document.body.dataset.audience;
-if (audience === 'field') {
-  document.querySelectorAll('nav a, .brand').forEach(link => {
-    const url = new URL(link.href);
-    url.searchParams.set('audience', 'field');
-    link.href = url.href;
-  });
+const selector=document.getElementById('placeSelect');
+places.forEach(place=>{
+ const option=document.createElement('option');option.value=place.key;option.textContent=place.name;selector.append(option);
+});
+function renderPlace(){
+ selector.value=p.key;
+ document.getElementById('sentence').textContent=p.summary;
+ const detail=document.getElementById('detail');detail.replaceChildren();
+ p.paragraphs.forEach(text=>{const paragraph=document.createElement('p');paragraph.textContent=text;detail.append(paragraph);});
+ const notes=document.getElementById('footnotes');notes.replaceChildren();
+ (p.footnotes||[]).forEach(note=>{
+  const section=document.createElement('details');const title=document.createElement('summary');title.textContent=note.title;
+  const body=document.createElement('p');body.textContent=note.body;section.append(title,body);notes.append(section);
+ });
+ document.getElementById('draftNotice').hidden=!p.draft;
 }
+renderPlace();
 
 const input=document.getElementById('cameraInput');
 const review=document.getElementById('photoReview');
@@ -76,22 +81,9 @@ function startOver(){
 document.getElementById('homeTitle').addEventListener('click',startOver);
 document.getElementById('startOver').addEventListener('click',startOver);
 
-document.querySelector('[data-choice="'+p.key+'"]').setAttribute('aria-current','page');
-
-document.querySelectorAll('[data-choice]').forEach(link=>{
- link.addEventListener('click',event=>{
-  event.preventDefault();
-  const next=places.find(item=>item.key===link.dataset.choice);
-  if(!next)return;
-  p=next;
-  document.getElementById('sentence').textContent=p.summary;
-  document.getElementById('detail').innerHTML=p.detail;
-  document.querySelectorAll('[data-choice], [data-place]').forEach(item=>{
-   if((item.dataset.choice||item.dataset.place)===p.key)item.setAttribute('aria-current','page');
-   else item.removeAttribute('aria-current');
-  });
-  const url=new URL(location.href);url.searchParams.set('place',p.key);
-  history.replaceState(null,'',url);
-  startOver();
- });
+selector.addEventListener('change',()=>{
+ p=places.find(place=>place.key===selector.value)||places[0];
+ renderPlace();
+ const url=new URL(location.href);url.searchParams.set('place',p.key);history.replaceState(null,'',url);
+ startOver();
 });
