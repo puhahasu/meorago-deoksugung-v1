@@ -75,3 +75,5 @@ function startOver(){
 }
 document.getElementById('homeTitle').addEventListener('click',startOver);
 document.getElementById('startOver').addEventListener('click',startOver);
+
+document.querySelector('[data-choice="'+p.key+'"]').setAttribute('aria-current','page');
