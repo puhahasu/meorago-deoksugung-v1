@@ -1,5 +1,5 @@
 const key = new URLSearchParams(location.search).get('place');
-const p = places.find(p=>p.key===key)||places[0];
+let p = places.find(p=>p.key===key)||places[0];
 document.title='머라고';
 document.getElementById('sentence').textContent=p.summary;
 document.getElementById('detail').innerHTML=p.detail;
@@ -77,3 +77,21 @@ document.getElementById('homeTitle').addEventListener('click',startOver);
 document.getElementById('startOver').addEventListener('click',startOver);
 
 document.querySelector('[data-choice="'+p.key+'"]').setAttribute('aria-current','page');
+
+document.querySelectorAll('[data-choice]').forEach(link=>{
+ link.addEventListener('click',event=>{
+  event.preventDefault();
+  const next=places.find(item=>item.key===link.dataset.choice);
+  if(!next)return;
+  p=next;
+  document.getElementById('sentence').textContent=p.summary;
+  document.getElementById('detail').innerHTML=p.detail;
+  document.querySelectorAll('[data-choice], [data-place]').forEach(item=>{
+   if((item.dataset.choice||item.dataset.place)===p.key)item.setAttribute('aria-current','page');
+   else item.removeAttribute('aria-current');
+  });
+  const url=new URL(location.href);url.searchParams.set('place',p.key);
+  history.replaceState(null,'',url);
+  startOver();
+ });
+});
